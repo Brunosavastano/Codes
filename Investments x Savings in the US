@@ -1,0 +1,66 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Step 1: Read the data from the spreadsheet
+file_path = r"C:\Users\bruno\OneDrive\Documents\Python Files\table.xlsx"  # Path to the uploaded spreadsheet
+df = pd.read_excel(file_path, header=None)  # Reading without headers to access by line numbers
+
+# Step 2: Extract data for Gross Saving (line 8)
+gross_saving = df.iloc[7, 2:80]  # Line 8 corresponds to index 7 in pandas (0-indexed)
+
+# Step 3: Extract data for Investment (line 28)
+investment = df.iloc[27, 2:80]  # Line 28 corresponds to index 27 in pandas (0-indexed)
+
+# Step 4: Extract GDP data (line 7)
+gdp = df.iloc[6, 2:80]  # Line 7 corresponds to index 6 in pandas (0-indexed)
+
+# Step 5: Extract column headers (years) from line 6
+years = df.iloc[5, 2:80]  # Line 6 corresponds to index 5 in pandas (0-indexed)
+
+# Convert all data to numeric, forcing errors to NaN if necessary
+years = pd.to_numeric(years, errors='coerce')
+gross_saving = pd.to_numeric(gross_saving, errors='coerce')
+investment = pd.to_numeric(investment, errors='coerce')
+gdp = pd.to_numeric(gdp, errors='coerce')
+
+# Drop NaN values to ensure only valid data is used
+years = years.dropna().astype(int)
+gross_saving = gross_saving.dropna()
+investment = investment.dropna()
+gdp = gdp.dropna()
+
+# Ensure all series have the same length after cleaning
+min_length = min(len(years), len(gross_saving), len(investment), len(gdp))
+years = years[:min_length]
+gross_saving = gross_saving[:min_length]
+investment = investment[:min_length]
+gdp = gdp[:min_length]
+
+# Step 6: Normalize Gross Saving and Investment by GDP to get percentages
+gross_saving_percentage = (gross_saving / gdp) * 100
+investment_percentage = (investment / gdp) * 100
+
+# Step 7: Plot the data with thick lines for both Gross Saving and Investment
+plt.figure(figsize=(12, 6))  # Set a larger figure size for better visualization
+
+# Plot Gross Saving
+plt.plot(years, gross_saving_percentage, linestyle='-', linewidth=2.5, label='Gross Saving')
+
+# Plot Investment
+plt.plot(years, investment_percentage, linestyle='-', linewidth=2.5, label='Investment', color='orange')
+
+# Add labels and title
+plt.xlabel('Years')
+plt.ylabel('Percentage of GDP')
+plt.title('Gross Saving and Investment as Percentage of GDP Over Time')
+plt.grid(True)
+plt.xticks(rotation=45)  # Rotate X-axis labels if needed for better readability
+
+# Set the Y-axis to start at 0
+plt.ylim(bottom=0)
+
+# Add a legend to differentiate between Gross Saving and Investment
+plt.legend()
+
+# Show the plot
+plt.show()
