@@ -1,0 +1,29 @@
+import math
+import numpy as np
+
+# Definindo os parâmetros iniciais da simulação
+S0 = 100.    # Preço inicial do ativo subjacente (por exemplo, uma ação)
+K = 105.     # Preço de exercício da opção (strike price)
+T = 1.0      # Tempo até o vencimento da opção (em anos)
+r = 0.05     # Taxa de juros livre de risco anual (5%)
+sigma = 0.2  # Volatilidade do preço do ativo subjacente (20% ao ano)
+I = 100000   # Número de simulações de Monte Carlo
+
+# Definindo a semente do gerador de números aleatórios para reprodutibilidade
+np.random.seed(1000)
+
+# Gerando uma matriz de números aleatórios seguindo uma distribuição normal padrão
+z = np.random.standard_normal(I)
+
+# Calculando os preços do ativo no vencimento (ST) usando a fórmula do movimento geométrico browniano
+ST = S0 * np.exp((r - sigma ** 2 / 2) * T + sigma * math.sqrt(T) * z)
+
+# Calculando o payoff da opção de compra no vencimento
+# Payoff é o máximo entre (ST - K) e 0, ou seja, só tem valor se ST > K
+hT = np.maximum(ST - K, 0)
+
+# Calculando o valor presente da opção (C0) descontando o valor médio do payoff usando a taxa livre de risco
+C0 = math.exp(-r * T) * np.mean(hT)
+
+# Imprimindo o valor estimado da opção de compra europeia
+print("Value of European call option: {:5.3f}.".format(C0))
