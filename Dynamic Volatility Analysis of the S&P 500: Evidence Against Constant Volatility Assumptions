@@ -1,0 +1,49 @@
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Step 1: Retrieve S&P 500 index level data from the web
+symbol = '^GSPC'
+sp500 = yf.Ticker(symbol)
+
+# Fetch historical data for the past few years
+data = sp500.history(period="10y")  # 10 years of data
+data = data[['Close']]  # Use only the closing prices
+
+# Step 2: Calculate the annualized rolling standard deviation of the log returns
+data['Log Returns'] = np.log(data['Close'] / data['Close'].shift(1))
+rolling_window = 252  # 252 trading days in a year
+
+# Calculate rolling standard deviation and annualize it
+data['Rolling Volatility'] = data['Log Returns'].rolling(window=rolling_window).std() * np.sqrt(rolling_window)
+
+# Drop NaN values resulting from rolling calculation
+data.dropna(inplace=True)
+
+# Step 3: Plot the index level data and the volatility results
+plt.figure(figsize=(14, 7))
+
+# Plotting the S&P 500 Index levels
+plt.subplot(2, 1, 1)  # Two plots, this is the first (index levels)
+plt.plot(data.index, data['Close'], label='S&P 500 Index Level', color='blue')
+plt.title('S&P 500 Index Levels')
+plt.xlabel('Date')
+plt.ylabel('Index Level')
+plt.grid(True)
+plt.legend()
+
+# Plotting the Rolling Volatility
+plt.subplot(2, 1, 2)  # Second plot (volatility)
+plt.plot(data.index, data['Rolling Volatility'], label='Rolling Annualized Volatility', color='orange')
+plt.title('S&P 500 Annualized Rolling Volatility')
+plt.xlabel('Date')
+plt.ylabel('Volatility')
+plt.grid(True)
+plt.legend()
+
+# Adjust layout to prevent overlap
+plt.tight_layout()
+
+# Show the plot
+plt.show()
